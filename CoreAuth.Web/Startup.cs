@@ -8,6 +8,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using CoreAuth.Web.Services;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Rewrite;
 
 namespace CoreAuth.Web
 {
@@ -52,7 +54,9 @@ namespace CoreAuth.Web
                 });
             });
 
-            services.AddMvc();
+            services.AddMvc(options=> {
+                options.Filters.Add(new RequireHttpsAttribute());
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -68,6 +72,11 @@ namespace CoreAuth.Web
                 app.UseExceptionHandler("/Home/Error");
             }
 
+            var options = new RewriteOptions()
+                    .AddRedirectToHttps(301,44381);
+
+            app.UseRewriter(options);
+            
             app.UseStaticFiles();
 
             app.UseAuthentication();
